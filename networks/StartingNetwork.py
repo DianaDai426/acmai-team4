@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-
 class StartingNetwork(torch.nn.Module):
     """
     Basic logistic regression on 224x224x3 images.

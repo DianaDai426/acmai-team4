@@ -5,7 +5,7 @@ import torch.utils.tensorboard
 
 
 def starting_train(
-    train_dataset, val_dataset, model, hyperparameters, n_eval, summary_path
+    train_dataset, val_dataset, model, hyperparameters, n_eval, summary_path, device
 ):
     """
     Trains and evaluates a model.
@@ -41,12 +41,24 @@ def starting_train(
     step = 0
     for epoch in range(epochs):
         print(f"Epoch {epoch + 1} of {epochs}")
-
+        losses = []
+        model.train()
         # Loop over each batch in the dataset
-        for i, batch in enumerate(train_loader):
-            print(f"\rIteration {i + 1} of {len(train_loader)} ...", end="")
+        for batch_inputs, batch_labels in enumerate(train_loader):
+            print(f"\rIteration {batch_inputs + 1} of {len(train_loader)} ...", end="")
+            for batch_inputs, batch_labels in train_loader:
+                #batch_inputs, batch_labels = batch_inputs.to(device), batch_labels.to(device)
 
-            # TODO: Backpropagation and gradient descent
+                # main body of your training
+                optimizer.zero_grad()
+                batch_outputs = model(batch_inputs)
+                loss = loss_fn(batch_outputs, batch_labels)
+                loss.backward()
+                losses.append(loss)
+                optimizer.step()
+            print('End of epoch loss:', round((sum(losses)/len(train_dataset)).item(), 3))
+
+
 
             # Periodically evaluate our model + log to Tensorboard
             if step % n_eval == 0:
