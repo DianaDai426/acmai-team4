@@ -63,6 +63,9 @@ def starting_train(
             # Periodically evaluate our model + log to Tensorboard
             if step % n_eval == 0:
                 # TODO:
+                train_outputs = model(train_dataset)
+                train_accuracy = compute_accuracy(train_outputs, train_dataset.data["Id"])
+                train_loss = loss_fn(train_outputs, train_dataset.data["Id"])
                 # Compute training loss and accuracy.
                 # Log the results to Tensorboard.
 
@@ -100,4 +103,11 @@ def evaluate(val_loader, model, loss_fn):
 
     TODO!
     """
+     # Compute validation loss and accuracy.
+    # Log the results to Tensorboard.
+    # Don't forget to turn off gradient calculations!
+    model.eval()
+    accuracy_outputs = model(val_loader)
+    accuracy_accuracy = compute_accuracy(accuracy_outputs, val_loader["Id"])
+    accuracy_loss = loss_fn(accuracy_outputs, val_loader["Id"])
     pass

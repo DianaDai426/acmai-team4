@@ -17,7 +17,7 @@ def main():
     hyperparameters = {"epochs": args.epochs, "batch_size": args.batch_size}
 
     # Create path for training summaries
-    summary_path = None
+    summary_path = "./summary"
     if args.logdir is not None:
         summary_path = f"{SUMMARIES_PATH}/{args.logdir}"
         os.makedirs(summary_path, exist_ok=True)

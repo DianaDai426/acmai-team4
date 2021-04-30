@@ -6,11 +6,12 @@ import torchvision
 
 class StartingDataset(torch.utils.data.Dataset):
     """
-    Dataset that contains 100000 3x224x224 black images (all zeros).
+    Dataset that contains 100000 3x224x224 black images (all zeros).'../../../humback-whale-identifiction/train.csv'
     """
 
     def __init__(self, train=True):
-        self.data = pd.read_csv('humback-whale-identifiction/train.csv')
+        # change this the local file path
+        self.data = pd.read_csv("../../../humback-whale-identifiction/train.csv")
         if train:
             self.data = self.data[0:int(len(self.data)*.8)]
         else:
