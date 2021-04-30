@@ -11,6 +11,7 @@ class StartingDataset(torch.utils.data.Dataset):
 
     def __init__(self, train=True):
         self.data = pd.read_csv('humback-whale-identifiction/train.csv')
+        self.corners = pd.read_csv('humback-whale-identifiction/corners.csv')
         if train:
             self.data = self.data[0:int(len(self.data)*.8)]
         else:
@@ -22,12 +23,20 @@ class StartingDataset(torch.utils.data.Dataset):
         id = self.data["Id"][index]
         image = Image.open("../../humpback-whale-identification/train/"+image_name)
 
-        resize = torchvision.transforms.Compose([
-            torchvision.transforms.Resize([224, 224]),
+        image_edits = torchvision.transforms.Compose([
+            # torchvision.transforms.Resize([224, 224]),
             torchvision.transforms.Grayscale(),
             torchvision.transforms.ToTensor()
             ])
-        image = resize(image)
+        image = image_edits(image)
+        corners_for_image = self.corners[self.corners["Image"] == image_name]
+        x0 = int(corners_for_image['x0'])
+        y0 = int(corners_for_image['y0'])
+        x1 = int(corners_for_image['x1'])
+        y1 = int(corners_for_image['y1'])
+        image = image[y0:y1+1, x0:x1+1]
+        image = torchvision.transforms.functional.resize(image, [224, 224])
+
         # image = torchvision.transforms.functional.rgb_to_grayscale(image)
         # image = torchvision.transforms.functional.to_tensor(image)
         
