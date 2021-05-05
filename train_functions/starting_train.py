@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.tensorboard
-
-sdf;jslkfsjdklf
+from torch.utils.tensorboard import SummaryWriter
 
 def starting_train(
     train_dataset, val_dataset, model, hyperparameters, n_eval, summary_path, device
 ):
+    writer = SummaryWriter()
+    
     """
     Trains and evaluates a model.
 
@@ -47,38 +47,43 @@ def starting_train(
         # Loop over each batch in the dataset
         for batch_inputs, batch_labels in enumerate(train_loader):
             print(f"\rIteration {batch_inputs + 1} of {len(train_loader)} ...", end="")
-            for batch_inputs, batch_labels in train_loader:
-                #batch_inputs, batch_labels = batch_inputs.to(device), batch_labels.to(device)
-
-                # main body of your training
-                optimizer.zero_grad()
-                batch_outputs = model(batch_inputs)
-                loss = loss_fn(batch_outputs, batch_labels)
-                loss.backward()
-                losses.append(loss)
-                optimizer.step()
-            print('End of epoch loss:', round((sum(losses)/len(train_dataset)).item(), 3))
 
 
+            #batch_inputs, batch_labels = batch_inputs.to(device), batch_labels.to(device)
 
-            # Periodically evaluate our model + log to Tensorboard
-            if step % n_eval == 0:
-                # TODO:
-                train_outputs = model(train_dataset)
-                train_accuracy = compute_accuracy(train_outputs, train_dataset.data["Id"])
-                train_loss = loss_fn(train_outputs, train_dataset.data["Id"])
-                # Compute training loss and accuracy.
-                # Log the results to Tensorboard.
+            # main body of your training
+            optimizer.zero_grad()
+            batch_outputs = model(batch_inputs)
+            loss = loss_fn(batch_outputs, batch_labels)
+            loss.backward()
+            losses.append(loss)
+            optimizer.step()
+        print('End of epoch loss:', round((sum(losses)/len(train_dataset)).item(), 3))
 
-                # TODO:
-                # Compute validation loss and accuracy.
-                # Log the results to Tensorboard.
-                # Don't forget to turn off gradient calculations!
-                evaluate(val_loader, model, loss_fn)
 
-            step += 1
 
-        print()
+        # Periodically evaluate our model + log to Tensorboard
+        if step % n_eval == 0:
+            # TODO:
+            # Compute training loss and accuracy.
+            # Log the results to Tensorboard.
+
+            # TODO:
+            # Compute validation loss and accuracy.
+            # Log the results to Tensorboard.
+            # Don't forget to turn off gradient calculations!
+            
+            train_loss, train_acc = evaluate(train_leader, model, loss_fn)
+            val_loss, val_acc = evaluate(val_loader, model, loss_fn)
+            
+            writer.add_scalar(f"Training loss", train_loss, epoch)
+            writer.add_scalar(f"Training Accuracy", train_acc, epoch)
+            writer.add_scalar(f"Validation loss", val_loss, epoch)
+            writer.add_scalar(f"Validation Accuracy", val_acc, epoch)
+
+        step += 1
+
+    print()
 
 
 def compute_accuracy(outputs, labels):
@@ -104,11 +109,34 @@ def evaluate(val_loader, model, loss_fn):
 
     TODO!
     """
+    
      # Compute validation loss and accuracy.
     # Log the results to Tensorboard.
     # Don't forget to turn off gradient calculations!
     model.eval()
-    accuracy_outputs = model(val_loader)
-    accuracy_accuracy = compute_accuracy(accuracy_outputs, val_loader["Id"])
-    accuracy_loss = loss_fn(accuracy_outputs, val_loader["Id"])
-    pass
+    num_correct = 0
+    loss = 0
+    total = 0
+    for batch in val_loader:
+        images, labels = batch
+        outputs = model(images)
+        predictions = torch.argmax(outputs, dim=1)
+        correct += (predictions == labels).int().sum()
+        total += len(predictions)
+        loss += loss_fn(outputs, labels)
+    return loss, correct/total
+    
+# conv_net.eval() # sets the net to evaluation mode to save memory
+
+# with torch.no_grad(): # tell it not to keep track of gradients for this portion
+#   total = 0
+#   correct = 0
+#   for batch in test_loader:
+#     images, labels = batch
+#     images = images.to(device)
+#     labels = labels.to(device)
+#     outputs = conv_net(images)
+#     predictions = torch.argmax(outputs, dim=1)
+#     correct += (predictions == labels).int().sum()
+#     total += len(predictions)
+#   print(correct / total)

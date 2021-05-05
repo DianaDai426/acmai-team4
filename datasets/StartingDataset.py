@@ -10,13 +10,8 @@ class StartingDataset(torch.utils.data.Dataset):
     """
 
     def __init__(self, train=True):
-<<<<<<< HEAD
         self.data = pd.read_csv('humback-whale-identifiction/train.csv')
         self.corners = pd.read_csv('humback-whale-identifiction/corners.csv')
-=======
-        # change this the local file path
-        self.data = pd.read_csv("../../../humback-whale-identifiction/train.csv")
->>>>>>> 523bb34afde70c3ecc8ae45448af5a33ca8792b0
         if train:
             self.data = self.data[0:int(len(self.data)*.8)]
         else:
