@@ -11,6 +11,9 @@ class StartingDataset(torch.utils.data.Dataset):
 
     def __init__(self, train=True):
         self.data = pd.read_csv('humback-whale-identifiction/train.csv')
+        self.data = self.data[self.data["Id"] != "new_whale"]
+        self.data = self.data[self.data.groupby('Id').Id.transform(len) > 10]
+
         self.corners = pd.read_csv('humback-whale-identifiction/corners.csv')
         if train:
             self.data = self.data[0:int(len(self.data)*.8)]
