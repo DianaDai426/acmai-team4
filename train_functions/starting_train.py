@@ -4,9 +4,9 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
 def starting_train(
-    train_dataset, val_dataset, model, hyperparameters, n_eval, summary_path, device
+    train_dataset, val_dataset, model, hyperparameters, n_eval, summary_path
 ):
-    writer = SummaryWriter()
+    # writer = SummaryWriter()
     
     """
     Trains and evaluates a model.
