@@ -13,13 +13,12 @@ class StartingDataset(torch.utils.data.Dataset):
         self.data = pd.read_csv('humback-whale-identifiction/train.csv')
         self.data = self.data[self.data["Id"] != "new_whale"]
         self.data = self.data[self.data.groupby('Id').Id.transform(len) > 10]
-
         self.corners = pd.read_csv('humback-whale-identifiction/corners.csv')
         if train:
             self.data = self.data[0:int(len(self.data)*.8)]
+            self.data = self.data[0:2000]
         else:
             self.data = self.data[int(len(self.data)*.8)+1:len(self.data)]
-
 
     def __getitem__(self, index):
         image_name = self.data["Image"][index]
