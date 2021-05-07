@@ -10,10 +10,10 @@ class StartingDataset(torch.utils.data.Dataset):
     """
 
     def __init__(self, train=True):
-        self.data = pd.read_csv('humback-whale-identifiction/train.csv')
+        self.data = pd.read_csv('../train.csv/')
         self.data = self.data[self.data["Id"] != "new_whale"]
         self.data = self.data[self.data.groupby('Id').Id.transform(len) > 10]
-        self.corners = pd.read_csv('humback-whale-identifiction/corners.csv')
+        self.corners = pd.read_csv('../train.csv/')
         if train:
             self.data = self.data[0:int(len(self.data)*.8)]
             self.data = self.data[0:2000]
@@ -23,7 +23,7 @@ class StartingDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         image_name = self.data["Image"][index]
         id = self.data["Id"][index]
-        image = Image.open("../../humpback-whale-identification/train/"+image_name)
+        image = Image.open("'../train.csv/'"+image_name)
 
         image_edits = torchvision.transforms.Compose([
             # torchvision.transforms.Resize([224, 224]),
