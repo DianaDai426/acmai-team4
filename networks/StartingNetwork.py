@@ -16,9 +16,9 @@ class StartingNetwork(torch.nn.Module):
         self.conv3 = nn.Conv2d(20, 35, 5, padding=2)
 
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(196, 300)
-        self.fc2 = nn.Linear(300, 250)
-        self.fc3 = nn.Linear(250, 227) #should be 5005 with new whale and small num of whales
+        self.fc1 = nn.Linear(6860, 6000)
+        # self.fc2 = nn.Linear(2000, 4000)
+        self.fc2 = nn.Linear(6000, 5005) #should be 5005 with new whale and small num of whales
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -29,6 +29,6 @@ class StartingNetwork(torch.nn.Module):
         x = self.flatten(x)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
+        # x = F.relu(self.fc3(x))
         x = self.sigmoid(x)
         return x

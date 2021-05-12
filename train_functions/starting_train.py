@@ -45,8 +45,13 @@ def starting_train(
         losses = []
         model.train()
         # Loop over each batch in the dataset
-        for batch_inputs, batch_labels in enumerate(train_loader):
-            print(f"\rIteration {batch_inputs + 1} of {len(train_loader)} ...", end="")
+        for i, batch in enumerate(train_loader):
+            if i % 4 != 0:
+                continue
+            batch_inputs = batch[1]
+            batch_labels = batch[0]
+            print(batch_labels)
+            print(f"\rIteration {i + 1} of {len(train_loader)} ...", end="")
 
 
             #batch_inputs, batch_labels = batch_inputs.to(device), batch_labels.to(device)
@@ -73,7 +78,7 @@ def starting_train(
             # Log the results to Tensorboard.
             # Don't forget to turn off gradient calculations!
             
-            train_loss, train_acc = evaluate(train_leader, model, loss_fn)
+            train_loss, train_acc = evaluate(train_loader, model, loss_fn)
             val_loss, val_acc = evaluate(val_loader, model, loss_fn)
             
             writer.add_scalar(f"Training loss", train_loss, epoch)
@@ -117,14 +122,18 @@ def evaluate(val_loader, model, loss_fn):
     num_correct = 0
     loss = 0
     total = 0
-    for batch in val_loader:
-        images, labels = batch
-        outputs = model(images)
-        predictions = torch.argmax(outputs, dim=1)
-        correct += (predictions == labels).int().sum()
-        total += len(predictions)
-        loss += loss_fn(outputs, labels)
-    return loss, correct/total
+    correct = 0
+    with torch.no_grad():
+        for i, batch in enumerate(val_loader):
+            images = batch[1]
+            labels = batch[0]
+            outputs = model(images)
+            predictions = torch.argmax(outputs, dim=1)
+            correct += (predictions == labels).int().sum()
+            total += len(predictions)
+            loss += loss_fn(outputs, labels)
+            print(i)
+    return loss, (correct/total)
     
 # conv_net.eval() # sets the net to evaluation mode to save memory
 
