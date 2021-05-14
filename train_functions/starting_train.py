@@ -46,8 +46,8 @@ def starting_train(
         model.train()
         # Loop over each batch in the dataset
         for i, batch in enumerate(train_loader):
-            if i % 4 != 0:
-                continue
+            if i == 5:
+                break
             batch_inputs = batch[1]
             batch_labels = batch[0]
             print(batch_labels)
@@ -133,6 +133,17 @@ def evaluate(val_loader, model, loss_fn):
             total += len(predictions)
             loss += loss_fn(outputs, labels)
             print(i)
+            if i == 198:
+                break
+        # for i, (labels, images) in enumerate(val_dataset):
+        #     # images = batch[1]
+        #     # labels = batch[0]
+        #     outputs = model(images)
+        #     predictions = torch.argmax(outputs, dim=1)
+        #     correct += (predictions == labels)
+        #     total += 1
+        #     loss += loss_fn(outputs, labels)
+        #     print(i)
     return loss, (correct/total)
     
 # conv_net.eval() # sets the net to evaluation mode to save memory

@@ -22,14 +22,16 @@ class StartingDataset(torch.utils.data.Dataset):
                 i += 1
         # print(self.mapping)
         if train:
-            self.data = self.data[0:int(len(self.data)*.8)]
-            self.data = self.data[0:2000]
+            # self.data = self.data[0:int(len(self.data)*.8)]
+            self.data = self.data.iloc[0:2000]
         else:
-            self.data = self.data[int(len(self.data)*.8)+1:len(self.data)]
+            # self.data = self.data[int(len(self.data)*.8)+1:len(self.data)-1]
+            self.data = self.data.iloc[2000: 3000]
+
 
     def __getitem__(self, index):
-        image_name = self.data["Image"][index]
-        id = self.data["Id"][index]
+        image_name = self.data["Image"].iloc[index]
+        id = self.data["Id"].iloc[index]
         image = Image.open("/content/train/"+image_name)
         # print(image.size)
         image_edits = torchvision.transforms.Compose([
