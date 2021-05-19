@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
+from pytorch_metric_learning import lossers, miners
 
 def starting_train(
     train_dataset, val_dataset, model, hyperparameters, n_eval, summary_path
@@ -39,6 +40,10 @@ def starting_train(
     if summary_path is not None:
         writer = torch.utils.tensorboard.SummaryWriter(summary_path)
 
+    # setting up transfer learning
+    loss_fn = losses.TripletMarginLoss(margin=margin)
+    miner = miners.BatchEasyHardMiner(pos_strategy = 'all', neg_stratgety = 'hard')
+
     step = 0
     for epoch in range(epochs):
         print(f"Epoch {epoch + 1} of {epochs}")
@@ -58,14 +63,29 @@ def starting_train(
 
             # main body of your training
             optimizer.zero_grad()
-            batch_outputs = model(batch_inputs)
-            print(f"batch size:\n{batch_outputs.size()}\n\n")
-            loss = loss_fn(batch_outputs, batch_labels)
+            embeddings = model(images)
+            hard_triplets = miner(embeddings, labels)
+            #batch_outputs = model(batch_inputs)
+           # print(f"batch size:\n{batch_outputs.shape()}\n\n")
+            loss = loss_fn(embeddings, labels, hard_triplets)
             loss.backward()
             losses.append(loss)
             optimizer.step()
         print('End of epoch loss:', round((sum(losses)/len(train_dataset)).item(), 3))
 
+
+    #each item of dataset is a single image
+    #now make it so each item is 4 different images but same ID
+    #grab 8 things from a dataset --> total of 8*4 images
+    #now batch has 8 groups of 4
+    #every whale in that batch appears 4 times
+    # when u return the 4 whales from the single item of the datset and grab the batch out of it,' it will be in a weird format:
+    #the batch will be of length 8 but each item inside will have 4 images inside it so we need to stack: torch.cat
+    #new whale can't be treated like a normal class bc tehy aren't all the same whale --> tehy're all unidentfiied
+    # 1) augment data --> for each whale: doa  horizontal flip  to the image, etc so that we ca make 4 images out of each single image
+    # that deals with all the whales that have very few images
+    # 2) instead of doing 4 whales for every item, return a set of 3 whales and then tag on an extra new_whale 
+    # so you have 3 images of the same whale, and then a new whale. we do this so we can use the new_whale images
 
 
         # Periodically evaluate our model + log to Tensorboard
