@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class StartingNetwork(torch.nn.Module):
     """
     Basic logistic regression on 224x224x1 images.
@@ -9,8 +10,8 @@ class StartingNetwork(torch.nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.resnet = torch.hub.load('pytorch/vision:v0.9.0', 'resnet18', pretrained=True, force_reload=True)
-        self.resnet = torch.nn.Sequential(*(list(resnet.children())[:-1]))
+        self.resnet = torch.hub.load('pytorch/vision:v0.9.0', 'resnet18', pretrained=True)
+        self.resnet = torch.nn.Sequential(*(list(self.resnet.children())[:-1]))
         self.resnet.eval()
 
         # self.conv1 = nn.Conv2d(1, 10, 7, padding=3)
@@ -26,7 +27,7 @@ class StartingNetwork(torch.nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        with torch.no_grad:
+        with torch.no_grad():
              x = self.resnet(x)
         
         # x = self.pool1(F.relu(self.conv1(x)))
