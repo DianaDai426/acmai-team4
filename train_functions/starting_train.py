@@ -59,6 +59,7 @@ def starting_train(
             # main body of your training
             optimizer.zero_grad()
             batch_outputs = model(batch_inputs)
+            print(f"batch size:\n{batch_outputs.shape()}\n\n")
             loss = loss_fn(batch_outputs, batch_labels)
             loss.backward()
             losses.append(loss)
@@ -132,9 +133,8 @@ def evaluate(val_loader, model, loss_fn):
             correct += (predictions == labels).int().sum()
             total += len(predictions)
             loss += loss_fn(outputs, labels)
-            print(i)
-            if i == 198:
-                break
+            # print(i)
+            
         # for i, (labels, images) in enumerate(val_dataset):
         #     # images = batch[1]
         #     # labels = batch[0]

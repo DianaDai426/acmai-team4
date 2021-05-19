@@ -10,10 +10,10 @@ class StartingDataset(torch.utils.data.Dataset):
     """
 
     def __init__(self, train=True):
-        self.data = pd.read_csv('/content/train.csv')
+        self.data = pd.read_csv('/Users/cameronfiske/Desktop/AI_Project/humpback-whale-identification/train.csv')
         # self.data = self.data[self.data["Id"] != "new_whale"]
         # self.data = self.data[self.data.groupby('Id').Id.transform(len) > 10]
-        self.corners = pd.read_csv('/content/acmai-team4/corners.csv')
+        self.corners = pd.read_csv('/Users/cameronfiske/Desktop/AI_Project/corners.csv')
         self.mapping = {}
         i = 0
         for label in self.data["Id"]:
