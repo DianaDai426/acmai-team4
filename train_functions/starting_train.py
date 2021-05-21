@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
+from pytorch_metric_learning import losses, miners
 
 def starting_train(
     train_dataset, val_dataset, model, hyperparameters, n_eval, summary_path
@@ -33,7 +34,8 @@ def starting_train(
 
     # Initalize optimizer (for gradient descent) and loss function
     optimizer = optim.Adam(model.parameters())
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = losses.TripletMarginLoss()
+    miner = miners.BatchEasyHardMiner(pos_strategy='all', neg_strategy='hard')
 
     # Initialize summary writer (for logging)
     if summary_path is not None:
@@ -42,14 +44,20 @@ def starting_train(
     step = 0
     for epoch in range(epochs):
         print(f"Epoch {epoch + 1} of {epochs}")
-        losses = []
+        trainLosses = []
         model.train()
         # Loop over each batch in the dataset
         for i, batch in enumerate(train_loader):
             if i == 5:
                 break
-            batch_inputs = batch[1]
-            batch_labels = batch[0]
+
+            batch_inputs = batch[1][0]
+            batch_labels = batch[0][0]
+            # print(batch[0])
+            for i in range(1, 8):
+                    batch_inputs = torch.cat((batch_inputs, batch[1][i]), 0)
+                    batch_labels = torch.cat((batch_labels, batch[0][i]), 0)
+            
             print(batch_labels)
             print(f"\rIteration {i + 1} of {len(train_loader)} ...", end="")
 
@@ -58,26 +66,33 @@ def starting_train(
 
             # main body of your training
             optimizer.zero_grad()
-            batch_outputs = model(batch_inputs)
-            # print(f"batch size:\n{batch_outputs.size()}\n\n")
-            loss = loss_fn(batch_outputs, batch_labels)
+            embeddings = model(batch_inputs) # images is a batch of images
+            hard_triplets = miner(embeddings, batch_inputs)
+            #batch_outputs = model(batch_inputs)
+           # print(f"batch size:\n{batch_outputs.shape()}\n\n")
+            loss = loss_fn(embeddings, labels, hard_triplets)
             loss.backward()
-            losses.append(loss)
+            trainLosses.append(loss)
             optimizer.step()
-        print('End of epoch loss:', round((sum(losses)/len(train_dataset)).item(), 3))
+        print('End of epoch loss:', round((sum(trainLosses)/len(train_dataset)).item(), 3))
 
+    
+    #each item of dataset is a single image
+    #now make it so each item is 4 different images but same ID
+    #grab 8 things from a dataset --> total of 8*4 images
+    #now batch has 8 groups of 4
+    #every whale in that batch appears 4 times
+    # when u return the 4 whales from the single item of the datset and grab the batch out of it,' it will be in a weird format:
+    #the batch will be of length 8 but each item inside will have 4 images inside it so we need to stack: torch.cat
+    #new whale can't be treated like a normal class bc they aren't all the same whale --> they're all unidentfiied
+    # 1) augment data --> for each whale: do a  horizontal flip  to the image, etc so that we ca make 4 images out of each single image
+    # that deals with all the whales that have very few images
+    # 2) instead of doing 4 whales for every item, return a set of 3 whales and then tag on an extra new_whale 
+    # so you have 3 images of the same whale, and then a new whale. we do this so we can use the new_whale images
 
 
         # Periodically evaluate our model + log to Tensorboard
         if step % n_eval == 0:
-            # TODO:
-            # Compute training loss and accuracy.
-            # Log the results to Tensorboard.
-
-            # TODO:
-            # Compute validation loss and accuracy.
-            # Log the results to Tensorboard.
-            # Don't forget to turn off gradient calculations!
             
             train_loss, train_acc = evaluate(train_loader, model, loss_fn)
             val_loss, val_acc = evaluate(val_loader, model, loss_fn)
@@ -93,16 +108,6 @@ def starting_train(
 
 
 def compute_accuracy(outputs, labels):
-    """
-    Computes the accuracy of a model's predictions.
-
-    Example input:
-        outputs: [0.7, 0.9, 0.3, 0.2]
-        labels:  [1, 1, 0, 1]
-
-    Example output:
-        0.75
-    """
 
     n_correct = (torch.round(outputs) == labels).sum().item()
     n_total = len(outputs)
@@ -160,3 +165,5 @@ def evaluate(val_loader, model, loss_fn):
 #     correct += (predictions == labels).int().sum()
 #     total += len(predictions)
 #   print(correct / total)
+
+
