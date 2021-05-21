@@ -59,7 +59,7 @@ def starting_train(
             # main body of your training
             optimizer.zero_grad()
             batch_outputs = model(batch_inputs)
-            print(f"batch size:\n{batch_outputs.size()}\n\n")
+            # print(f"batch size:\n{batch_outputs.size()}\n\n")
             loss = loss_fn(batch_outputs, batch_labels)
             loss.backward()
             losses.append(loss)
