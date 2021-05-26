@@ -53,12 +53,17 @@ def starting_train(
 
             batch_inputs = batch[1][0]
             batch_labels = batch[0][0]
+            # print("inputs")
+            # print(len(batch_inputs))
+            # print(batch_inputs)
+            # print("labels")
+            # print(batch_labels)
             # print(batch[0])
-            for i in range(1, 8):
+            for i in range(1, 4): # set to batch_size
                     batch_inputs = torch.cat((batch_inputs, batch[1][i]), 0)
                     batch_labels = torch.cat((batch_labels, batch[0][i]), 0)
             
-            print(batch_labels)
+            # print(batch_labels)
             print(f"\rIteration {i + 1} of {len(train_loader)} ...", end="")
 
 
@@ -67,10 +72,11 @@ def starting_train(
             # main body of your training
             optimizer.zero_grad()
             embeddings = model(batch_inputs) # images is a batch of images
-            hard_triplets = miner(embeddings, batch_inputs)
+            # print(embeddings)
+            hard_triplets = miner(embeddings, batch_labels)
             #batch_outputs = model(batch_inputs)
            # print(f"batch size:\n{batch_outputs.shape()}\n\n")
-            loss = loss_fn(embeddings, labels, hard_triplets)
+            loss = loss_fn(embeddings, batch_labels, hard_triplets)
             loss.backward()
             trainLosses.append(loss)
             optimizer.step()
@@ -133,7 +139,7 @@ def evaluate(val_loader, model, loss_fn):
         for i, batch in enumerate(val_loader):
             images = batch[1]
             labels = batch[0]
-            outputs = model(images)
+            outputs = model(torch.tensor(images))
             predictions = torch.argmax(outputs, dim=1)
             correct += (predictions == labels).int().sum()
             total += len(predictions)
