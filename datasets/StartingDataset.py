@@ -24,10 +24,10 @@ class StartingDataset(torch.utils.data.Dataset):
         # print(self.data['Id'].value_counts(ascending=True))
         if train:
             # self.data = self.data[0:int(len(self.data)*.8)]
-            self.data = self.data.iloc[0:2000]
+            self.data = self.data.iloc[:int(0.9*len(self.data))]
         else:
             # self.data = self.data[int(len(self.data)*.8)+1:len(self.data)-1]
-            self.data = self.data.iloc[2000: 3000]
+            self.data = self.data.iloc[int(0.9*len(self.data)) + 1:]
         
         self.images_with_same_id = {}   #takes each ID and maps to the tensor of all the images
         # {self.mapping[id] => [image names]}
@@ -59,7 +59,7 @@ class StartingDataset(torch.utils.data.Dataset):
                 #change to get image from images_with_same_id
                 image_name = images_4[i]
                 #do the image manipulation for each image
-                image = Image.open("/content/train"+image_name)
+                image = Image.open("/content/train/"+image_name)
                 image = image.convert('RGB')
                 image_edits = torchvision.transforms.Compose([
                     # torchvision.transforms.Resize([224, 224]),

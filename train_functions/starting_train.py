@@ -46,15 +46,15 @@ def starting_train(
 
     data = pd.read_csv("/content/train.csv")
     data = data.sample(frac=1, random_state=1) # Shuffle data
-    # train_data = data.iloc[:int(0.9*len(data))]
-    # test_data = data.iloc[int(0.9*len(data)) + 1:]
-    train_data = data.iloc[0:200]
-    test_data = data.iloc[200:300]
+    train_data = data.iloc[:int(0.9*len(data))]
+    test_data = data.iloc[int(0.9*len(data)) + 1:]
+    # train_data = data.iloc[0:200]
+    # test_data = data.iloc[200:300]
 
     train_eval_dataset = EvaluationDataset(
         train_data,
         "/content/acmai-team4/corners.csv",
-        "/content/train",
+        "/content/train/",
         train=True,
         drop_duplicate_whales=True, # If you set this to True, your evaluation accuracy will be lower!!
                                     # If you set this to False, evaluate() will take longer!!
@@ -67,7 +67,7 @@ def starting_train(
     test_eval_dataset = EvaluationDataset(
         test_data,
         "/content/acmai-team4/corners.csv",
-        "/content/train",
+        "/content/train/",
         train=False,
         drop_duplicate_whales=False,
     )
@@ -82,12 +82,13 @@ def starting_train(
     if summary_path is not None:
         writer = torch.utils.tensorboard.SummaryWriter(summary_path)
 
-    step = 0
+
     for epoch in range(epochs):
         print(f"Epoch {epoch + 1} of {epochs}")
         trainLosses = []
         model.train()
         # Loop over each batch in the dataset
+        step = 1
         for i, batch in enumerate(train_loader):
 
             batch_inputs = batch[1][0]
@@ -98,9 +99,9 @@ def starting_train(
             # print("labels")
             # print(batch_labels)
             # print(batch[0])
-            for i in range(1, 4): # set to batch_size
-                    batch_inputs = torch.cat((batch_inputs, batch[1][i]), 0)
-                    batch_labels = torch.cat((batch_labels, batch[0][i]), 0)
+            for j in range(1, 4): # set to batch_size
+                    batch_inputs = torch.cat((batch_inputs, batch[1][j]), 0)
+                    batch_labels = torch.cat((batch_labels, batch[0][j]), 0)
 
             batch_inputs = batch_inputs.to(device)
             batch_labels = batch_labels.to(device)
@@ -121,18 +122,17 @@ def starting_train(
             loss.backward()
             trainLosses.append(loss)
             optimizer.step()
+            if step % n_eval == 0:
+                # print(len(train_eval_loader))
+                accuracy = evaluate(train_eval_loader, test_eval_loader, model)
+                print(f"Accuracy: {accuracy}")
+                writer.add_scalar(f"Accuracy", accuracy, epoch)
+
+            step += 1
         print('End of epoch loss:', round((sum(trainLosses)/len(train_dataset)).item(), 3))
 
 
-        # Periodically evaluate our model + log to Tensorboard
-        #TODO: implement new evaluate code! https://gist.github.com/franktzheng/706fde69a652488a389455678438d4f0
-        if step % n_eval == 0:
-            # print(len(train_eval_loader))
-            accuracy = evaluate(train_eval_loader, test_eval_loader, model)
-            print(f"Accuracy: {accuracy}")
-            writer.add_scalar(f"Accuracy", accuracy, epoch)
-
-        step += 1
+        
 
     print()
 

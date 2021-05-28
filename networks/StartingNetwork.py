@@ -12,7 +12,7 @@ class StartingNetwork(torch.nn.Module):
         super().__init__()
         self.resnet = torch.hub.load('pytorch/vision:v0.9.0', 'resnet18', pretrained=True)
         self.resnet = torch.nn.Sequential(*(list(self.resnet.children())[:-1]))
-        self.resnet.eval()
+        # self.resnet .eval()
 
         # self.conv1 = nn.Conv2d(1, 10, 7, padding=3)
         # self.pool1 = nn.MaxPool2d(4, 4)
@@ -26,10 +26,9 @@ class StartingNetwork(torch.nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        with torch.no_grad():
-             x = self.resnet(x)
+        # with torch.no_grad():
+        x = self.resnet(x)
         x = self.flatten(x)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         return x
-tnamai-eam4tnamai-eam4tnamai-eam4
