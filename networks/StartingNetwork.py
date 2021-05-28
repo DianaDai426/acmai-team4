@@ -32,3 +32,4 @@ class StartingNetwork(torch.nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         return x
+tnamai-eam4tnamai-eam4tnamai-eam4

@@ -10,9 +10,10 @@ class StartingDataset(torch.utils.data.Dataset):
     """
 
     def __init__(self, train=True):
-        self.data = pd.read_csv('/Users/cameronfiske/Desktop/AI_Project/humpback-whale-identification/train.csv')
+        self.data = pd.read_csv('/content/train.csv')
         self.data = self.data[self.data["Id"] != "new_whale"]
-        self.corners = pd.read_csv('/Users/cameronfiske/Desktop/AI_Project/corners.csv')
+        self.data = self.data.sample(frac=1, random_state=1)
+        self.corners = pd.read_csv('/content/acmai-team4/corners.csv')
         self.mapping = {}
         i = 0
         for label in self.data["Id"]:
@@ -58,7 +59,7 @@ class StartingDataset(torch.utils.data.Dataset):
                 #change to get image from images_with_same_id
                 image_name = images_4[i]
                 #do the image manipulation for each image
-                image = Image.open("/Users/cameronfiske/Desktop/AI_Project/humpback-whale-identification/train/"+image_name)
+                image = Image.open("/content/train"+image_name)
                 image = image.convert('RGB')
                 image_edits = torchvision.transforms.Compose([
                     # torchvision.transforms.Resize([224, 224]),
@@ -86,9 +87,7 @@ class StartingDataset(torch.utils.data.Dataset):
         # print(torch.tensor(labels))
         # print("4")
         # print(torch.tensor(images_4))
-        return labels, images_4 #return list of 4 of the same labels and 4 random images TODO: make this return images_4 as a tensor
-        # of tensors torch.tensor(images_4) does not work for some reason. Maybe make it a tensor from the beginning and continuously 
-        #concatinate the new image tensor onto it.
+        return labels, images_4
     
 
     def __len__(self):
